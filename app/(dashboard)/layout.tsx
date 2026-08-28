@@ -24,6 +24,12 @@ export default async function DashboardLayout({
     .eq("id", user.id)
     .single();
 
+  // Un compte "client" qui arriverait ici (URL devinée, ancien favori...)
+  // repart vers son propre espace — cette zone est réservée aux conseillers.
+  if (profile?.role === "client") {
+    redirect("/mon-espace");
+  }
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />

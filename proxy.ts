@@ -7,7 +7,7 @@ import { NextResponse, type NextRequest } from "next/server";
  * sécurité de la couche proxy ne s'activent que sous ce nouveau nom.
  */
 
-const PROTECTED_PREFIXES = ["/dashboard", "/clients"];
+const PROTECTED_PREFIXES = ["/dashboard", "/clients", "/mon-espace"];
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request: { headers: request.headers } });

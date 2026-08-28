@@ -6,6 +6,7 @@ import { getClientById } from "@/modules/clients/service";
 import { PageHeader, WaveRule } from "@/components/layout/page-header";
 import { InfoItem, MissingBanner } from "@/components/layout/missing-info";
 import { DeleteClientButton } from "@/components/clients/delete-client-button";
+import { InviteClientButton } from "@/components/clients/invite-client-button";
 
 const REQUIRED_FIELDS = [
   "dateNaissance",
@@ -106,6 +107,16 @@ export default async function ClientPage({
             ))}
           </ul>
         )}
+      </Section>
+
+      <Section title="Espace client">
+        <div className="sm:col-span-2">
+          <InviteClientButton
+            clientId={client.id}
+            hasEmail={Boolean(client.email)}
+            alreadyInvited={Boolean(client.userId)}
+          />
+        </div>
       </Section>
 
       <div className="rounded-xl border border-dashed border-border p-5 text-sm text-foreground/50">

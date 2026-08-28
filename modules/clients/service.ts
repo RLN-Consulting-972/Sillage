@@ -14,6 +14,7 @@ function mapRowToClient(
 ): Client {
   return {
     id: row.id,
+    userId: row.user_id ?? undefined,
     civilite: row.civilite ?? undefined,
     nom: row.nom,
     prenom: row.prenom,
@@ -132,6 +133,27 @@ async function upsertConjointEtEnfants(
       }))
     );
   }
+}
+
+export async function getOwnClientRecord(
+  supabase: SupabaseClient<Database>,
+  userId: string
+): Promise<Client | null> {
+  const { data: clientRow, error } = await supabase
+    .from("clients")
+    .select("*")
+    .eq("user_id", userId)
+    .maybeSingle();
+
+  if (error) throw error;
+  if (!clientRow) return null;
+
+  const [{ data: conjointRow }, { data: enfantsRows }] = await Promise.all([
+    supabase.from("conjoints").select("*").eq("client_id", clientRow.id).maybeSingle(),
+    supabase.from("enfants").select("*").eq("client_id", clientRow.id),
+  ]);
+
+  return mapRowToClient(clientRow, conjointRow ?? null, enfantsRows ?? []);
 }
 
 export async function createClient(

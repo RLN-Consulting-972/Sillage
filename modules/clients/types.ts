@@ -19,6 +19,7 @@ export interface Conjoint {
 
 export interface Client {
   id: string;
+  userId?: string;
   civilite?: string;
   nom: string;
   prenom: string;

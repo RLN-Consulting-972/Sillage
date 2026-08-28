@@ -108,10 +108,43 @@ Supabase réel et Docker seront disponibles :
 npx supabase gen types typescript --project-id <votre-project-id> > types/database.types.ts
 ```
 
-## Prochaines étapes (Phase 2)
+## Phase 2 — sous-étape 1 : mode client (fondation)
 
-- Questionnaire client (parcours guidé en 12 étapes).
-- Mode client (accès restreint).
+Un client peut désormais avoir son propre compte de connexion, distinct
+du conseiller qui gère son dossier :
+
+- **Migration** `database/migrations/0002_client_access.sql` : ajoute
+  `clients.user_id` (lien vers `auth.users`) et des policies RLS pour
+  qu'un client connecté ne voie que sa propre fiche.
+- **Invitation** : depuis la fiche client (section "Espace client"), le
+  conseiller clique sur "Inviter à se connecter". Ça envoie un email
+  d'invitation Supabase, crée le profil avec le rôle `client`, et relie
+  le compte à la fiche.
+- **Espace client** (`/mon-espace`) : zone séparée du dashboard
+  conseiller, avec sa propre garde d'accès. Pour l'instant en lecture
+  seule (identité) — le questionnaire modifiable arrive à la sous-étape
+  suivante.
+- **Redirection par rôle** : après connexion, un conseiller atterrit sur
+  `/dashboard`, un client sur `/mon-espace` — chacun est bloqué de
+  l'espace de l'autre même en devinant l'URL.
+
+### Nouvelle variable d'environnement sensible
+
+L'invitation d'un client nécessite la **clé `service_role`** de Supabase
+(`SUPABASE_SERVICE_ROLE_KEY` dans `.env.example`), qui contourne toutes
+les règles de sécurité de la base — à ne jamais préfixer par
+`NEXT_PUBLIC_`, ni exposer côté navigateur. Elle n'est utilisée que dans
+`lib/supabase/admin.ts`, importé uniquement par la route serveur
+`app/api/clients/[clientId]/inviter/route.ts`.
+
+**Avant de redéployer** : ajouter cette clé dans les variables
+d'environnement Vercel (disponible dans Supabase > Settings > API Keys,
+section "Secret keys" — pas "Publishable key").
+
+## Prochaines étapes (Phase 2, suite)
+
+- Questionnaire guidé (parcours en 12 étapes) permettant au client de
+  compléter lui-même son dossier depuis `/mon-espace`.
 - Module Documents (upload, catégories, statut, version) — avec le même
   badge bordeaux "information manquante" que sur la fiche client.
 

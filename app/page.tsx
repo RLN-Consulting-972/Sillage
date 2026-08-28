@@ -7,5 +7,15 @@ export default async function RootPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  redirect(user ? "/dashboard" : "/login");
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  redirect(profile?.role === "client" ? "/mon-espace" : "/dashboard");
 }
