@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -21,7 +22,13 @@ export default function LoginPage() {
 
     setLoading(false);
     if (error) {
-      setError("Email ou mot de passe incorrect.");
+      if (error.message.toLowerCase().includes("email not confirmed")) {
+        setError(
+          "Ce compte n'a pas encore été confirmé. Vérifiez vos emails (et vos indésirables)."
+        );
+      } else {
+        setError("Email ou mot de passe incorrect.");
+      }
       return;
     }
     router.push("/dashboard");
@@ -69,6 +76,13 @@ export default function LoginPage() {
           >
             {loading ? "Connexion..." : "Se connecter"}
           </button>
+
+          <Link
+            href="/mot-de-passe-oublie"
+            className="block text-center text-sm text-foreground/60 hover:underline"
+          >
+            Mot de passe oublié ?
+          </Link>
         </form>
       </div>
     </div>
