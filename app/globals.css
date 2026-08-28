@@ -1,0 +1,47 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Charte graphique officielle RLN Consulting (yvanemonides.com, mai 2022).
+  Couleurs extraites du logo réel et confirmées par le document de charte :
+  or #C4A160, prune #8C2859, noir #000000.
+  "Bordeaux" (#6E1E33) est une couleur fonctionnelle ajoutée pour signaler
+  les informations manquantes dans un dossier — distincte de la prune
+  décorative pour éviter toute confusion entre les deux usages.
+*/
+:root {
+  --background: 45 18% 96%;
+  --foreground: 217 23% 15%;
+
+  --primary: 0 0% 10%;
+  --primary-dark: 0 0% 0%;
+  --secondary: 45 15% 92%;
+  --accent: 39 46% 57%;
+  --accent-dark: 39 49% 36%;
+  --plum: 331 56% 35%;
+  --bordeaux: 344 57% 27%;
+
+  --success: 146 29% 33%;
+  --warning: 38 90% 55%;
+  --danger: 9 59% 44%;
+
+  --border: 45 18% 87%;
+  --radius: 0.75rem;
+
+  --font-bodoni: "Bodoni Moda", Georgia, serif;
+  --font-inter: "Inter", system-ui, sans-serif;
+}
+
+.dark {
+  --background: 217 25% 8%;
+  --foreground: 45 18% 96%;
+  --secondary: 217 20% 16%;
+  --border: 217 15% 20%;
+}
+
+body {
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: var(--font-inter);
+}
