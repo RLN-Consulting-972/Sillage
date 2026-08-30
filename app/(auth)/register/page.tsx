@@ -18,10 +18,10 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
 
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } },
+      options: { data: { full_name: fullName, role: "conseiller" } },
     });
 
     if (error) {
@@ -30,13 +30,11 @@ export default function RegisterPage() {
       return;
     }
 
-    if (data.user) {
-      await supabase.from("profiles").insert({
-        id: data.user.id,
-        role: "conseiller",
-        full_name: fullName,
-      });
-    }
+    // Le profil (avec le rôle "conseiller") est désormais créé
+    // automatiquement par un trigger côté base de données (migration
+    // 0003) à partir des métadonnées transmises ci-dessus — plus fiable
+    // qu'une insertion ici, qui échouait silencieusement tant que la
+    // session n'était pas encore établie.
 
     setLoading(false);
     router.push("/login");

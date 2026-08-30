@@ -35,31 +35,23 @@ export async function POST(
   const admin = createAdminClient();
   const origin = new URL(request.url).origin;
 
+  // Le rôle et le nom sont transmis dans les métadonnées : c'est le
+  // trigger public.handle_new_user() (migration 0003) qui les lira pour
+  // créer automatiquement le bon profil, de façon fiable côté base de
+  // données plutôt que dans ce code applicatif.
   const { data: invited, error: inviteError } =
     await admin.auth.admin.inviteUserByEmail(client.email, {
       redirectTo: `${origin}/reinitialiser-mot-de-passe`,
+      data: {
+        role: "client",
+        full_name: `${client.prenom} ${client.nom}`,
+      },
     });
 
   if (inviteError || !invited.user) {
     console.error(inviteError);
     return NextResponse.json(
       { error: "Impossible d'envoyer l'invitation." },
-      { status: 500 }
-    );
-  }
-
-  // Le profil du client est créé avec le rôle "client" — c'est ce rôle,
-  // vérifié à la connexion, qui déclenche la redirection vers l'espace
-  // client restreint plutôt que le tableau de bord conseiller.
-  const { error: profileError } = await admin.from("profiles").insert({
-    id: invited.user.id,
-    role: "client",
-    full_name: `${client.prenom} ${client.nom}`,
-  });
-  if (profileError) {
-    console.error(profileError);
-    return NextResponse.json(
-      { error: "Impossible de créer le profil client." },
       { status: 500 }
     );
   }
