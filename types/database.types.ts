@@ -197,6 +197,165 @@ export interface Database {
         };
         Relationships: [];
       };
+      revenus: {
+        Row: {
+          id: string;
+          client_id: string;
+          type: string;
+          montant: number;
+          periodicite: string;
+          titulaire: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          client_id: string;
+          type: string;
+          montant: number;
+          periodicite?: string;
+          titulaire?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          client_id?: string;
+          type?: string;
+          montant?: number;
+          periodicite?: string;
+          titulaire?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      charges: {
+        Row: {
+          id: string;
+          client_id: string;
+          type: string;
+          montant: number;
+          periodicite: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          client_id: string;
+          type: string;
+          montant: number;
+          periodicite?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          client_id?: string;
+          type?: string;
+          montant?: number;
+          periodicite?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      patrimoine_immobilier: {
+        Row: {
+          id: string;
+          client_id: string;
+          type: string;
+          valeur_estimee: number;
+          credit_restant: number | null;
+          mensualite_credit: number | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          client_id: string;
+          type: string;
+          valeur_estimee: number;
+          credit_restant?: number | null;
+          mensualite_credit?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          client_id?: string;
+          type?: string;
+          valeur_estimee?: number;
+          credit_restant?: number | null;
+          mensualite_credit?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      patrimoine_financier: {
+        Row: {
+          id: string;
+          client_id: string;
+          type: string;
+          montant: number;
+          etablissement: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          client_id: string;
+          type: string;
+          montant: number;
+          etablissement?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          client_id?: string;
+          type?: string;
+          montant?: number;
+          etablissement?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      objectifs: {
+        Row: {
+          id: string;
+          client_id: string;
+          type: string;
+          montant_cible: number | null;
+          echeance: string | null;
+          priorite: string;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          client_id: string;
+          type: string;
+          montant_cible?: number | null;
+          echeance?: string | null;
+          priorite?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          client_id?: string;
+          type?: string;
+          montant_cible?: number | null;
+          echeance?: string | null;
+          priorite?: string;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -214,3 +373,8 @@ export type ClientRow = Database["public"]["Tables"]["clients"]["Row"];
 export type ConjointRow = Database["public"]["Tables"]["conjoints"]["Row"];
 export type EnfantRow = Database["public"]["Tables"]["enfants"]["Row"];
 export type DocumentRow = Database["public"]["Tables"]["documents"]["Row"];
+export type RevenuRow = Database["public"]["Tables"]["revenus"]["Row"];
+export type ChargeRow = Database["public"]["Tables"]["charges"]["Row"];
+export type PatrimoineImmobilierRow = Database["public"]["Tables"]["patrimoine_immobilier"]["Row"];
+export type PatrimoineFinancierRow = Database["public"]["Tables"]["patrimoine_financier"]["Row"];
+export type ObjectifRow = Database["public"]["Tables"]["objectifs"]["Row"];

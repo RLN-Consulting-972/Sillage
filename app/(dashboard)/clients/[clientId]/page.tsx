@@ -4,11 +4,24 @@ import { Edit2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getClientById } from "@/modules/clients/service";
 import { listDocuments } from "@/modules/documents/service";
+import {
+  listRevenus, listCharges, listImmobilier, listFinanciers, listObjectifs,
+} from "@/modules/finances/service";
+import {
+  REVENU_TYPES, CHARGE_TYPES, IMMOBILIER_TYPES, FINANCIER_TYPES,
+  OBJECTIF_TYPES, PERIODICITES, PRIORITES,
+} from "@/modules/finances/types";
+import {
+  calculateRevenusMensuels, calculateChargesMensuelles, calculateSavingsCapacity,
+  calculateGrossWealth, calculateNetWealth,
+} from "@/calculations/patrimoine";
 import { PageHeader, WaveRule } from "@/components/layout/page-header";
 import { InfoItem, MissingBanner } from "@/components/layout/missing-info";
 import { DeleteClientButton } from "@/components/clients/delete-client-button";
 import { InviteClientButton } from "@/components/clients/invite-client-button";
 import { DocumentsSection } from "@/components/clients/documents-section";
+import { FinanceSection } from "@/components/clients/finance-section";
+import { StatCard } from "@/components/layout/stat-card";
 
 const REQUIRED_FIELDS = [
   "dateNaissance",
@@ -17,6 +30,14 @@ const REQUIRED_FIELDS = [
   "email",
   "adresse",
 ] as const;
+
+function formatEUR(n: number): string {
+  return new Intl.NumberFormat("fr-FR", {
+    style: "currency",
+    currency: "EUR",
+    maximumFractionDigits: 0,
+  }).format(n);
+}
 
 export default async function ClientPage({
   params,
@@ -29,8 +50,28 @@ export default async function ClientPage({
 
   if (!client) notFound();
 
-  const documents = await listDocuments(supabase, clientId);
+  const [documents, revenus, charges, biens, actifs, objectifs] = await Promise.all([
+    listDocuments(supabase, clientId),
+    listRevenus(supabase, clientId),
+    listCharges(supabase, clientId),
+    listImmobilier(supabase, clientId),
+    listFinanciers(supabase, clientId),
+    listObjectifs(supabase, clientId),
+  ]);
+
   const missingCount = REQUIRED_FIELDS.filter((f) => !client[f]).length;
+
+  const revenusMensuels = calculateRevenusMensuels(revenus);
+  const chargesMensuelles = calculateChargesMensuelles(charges);
+  const capaciteEpargne = calculateSavingsCapacity(revenus, charges);
+  const patrimoineBrut = calculateGrossWealth(
+    biens.map((b) => ({ valeurEstimee: b.valeurEstimee, creditRestant: b.creditRestant })),
+    actifs
+  );
+  const patrimoineNet = calculateNetWealth(
+    biens.map((b) => ({ valeurEstimee: b.valeurEstimee, creditRestant: b.creditRestant })),
+    actifs
+  );
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -63,6 +104,17 @@ export default async function ClientPage({
           {missingCount > 1 ? "s" : ""} dans le dossier
         </MissingBanner>
       )}
+
+      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <StatCard label="Patrimoine brut" value={formatEUR(patrimoineBrut)} />
+        <StatCard label="Patrimoine net" value={formatEUR(patrimoineNet)} />
+        <StatCard label="Revenus mensuels" value={formatEUR(revenusMensuels)} />
+        <StatCard
+          label="Capacité d'épargne"
+          value={formatEUR(capaciteEpargne)}
+          hint={capaciteEpargne < 0 ? "Charges > revenus" : undefined}
+        />
+      </div>
 
       <Section title="Identité">
         <InfoItem label="Date de naissance" value={client.dateNaissance} required />
@@ -112,6 +164,74 @@ export default async function ClientPage({
         )}
       </Section>
 
+      <FinanceSection
+        title="Revenus"
+        listUrl={`/api/clients/${client.id}/revenus`}
+        deleteUrlPrefix="/api/finances/revenus"
+        items={revenus}
+        emptyLabel="Aucun revenu renseigné."
+        fields={[
+          { key: "type", label: "Type", kind: "select", options: REVENU_TYPES },
+          { key: "montant", label: "Montant", kind: "number" },
+          { key: "periodicite", label: "Périodicité", kind: "select", options: PERIODICITES },
+          { key: "titulaire", label: "Titulaire", kind: "text" },
+        ]}
+      />
+
+      <FinanceSection
+        title="Charges"
+        listUrl={`/api/clients/${client.id}/charges`}
+        deleteUrlPrefix="/api/finances/charges"
+        items={charges}
+        emptyLabel="Aucune charge renseignée."
+        fields={[
+          { key: "type", label: "Type", kind: "select", options: CHARGE_TYPES },
+          { key: "montant", label: "Montant", kind: "number" },
+          { key: "periodicite", label: "Périodicité", kind: "select", options: PERIODICITES },
+        ]}
+      />
+
+      <FinanceSection
+        title="Patrimoine immobilier"
+        listUrl={`/api/clients/${client.id}/immobilier`}
+        deleteUrlPrefix="/api/finances/immobilier"
+        items={biens}
+        emptyLabel="Aucun bien immobilier renseigné."
+        fields={[
+          { key: "type", label: "Type de bien", kind: "select", options: IMMOBILIER_TYPES },
+          { key: "valeurEstimee", label: "Valeur estimée", kind: "number" },
+          { key: "creditRestant", label: "Crédit restant dû", kind: "number" },
+          { key: "mensualiteCredit", label: "Mensualité", kind: "number" },
+        ]}
+      />
+
+      <FinanceSection
+        title="Placements financiers"
+        listUrl={`/api/clients/${client.id}/financiers`}
+        deleteUrlPrefix="/api/finances/financiers"
+        items={actifs}
+        emptyLabel="Aucun placement renseigné."
+        fields={[
+          { key: "type", label: "Type de placement", kind: "select", options: FINANCIER_TYPES },
+          { key: "montant", label: "Montant", kind: "number" },
+          { key: "etablissement", label: "Établissement", kind: "text" },
+        ]}
+      />
+
+      <FinanceSection
+        title="Objectifs"
+        listUrl={`/api/clients/${client.id}/objectifs`}
+        deleteUrlPrefix="/api/finances/objectifs"
+        items={objectifs}
+        emptyLabel="Aucun objectif renseigné."
+        fields={[
+          { key: "type", label: "Objectif", kind: "select", options: OBJECTIF_TYPES },
+          { key: "montantCible", label: "Montant cible", kind: "number" },
+          { key: "echeance", label: "Échéance", kind: "text" },
+          { key: "priorite", label: "Priorité", kind: "select", options: PRIORITES },
+        ]}
+      />
+
       <DocumentsSection clientId={client.id} initialDocuments={documents} />
 
       <Section title="Espace client">
@@ -125,8 +245,10 @@ export default async function ClientPage({
       </Section>
 
       <div className="rounded-xl border border-dashed border-border p-5 text-sm text-foreground/50">
-        Revenus, charges, patrimoine, objectifs, fiscalité, retraite et
-        préconisations seront disponibles aux étapes suivantes de l'outil.
+        Fiscalité, retraite et préconisations seront disponibles aux étapes
+        suivantes de l'outil. Le patrimoine brut/net et la capacité
+        d'épargne ci-dessus sont calculés automatiquement à partir des
+        revenus, charges et patrimoine renseignés.
       </div>
     </div>
   );
@@ -140,3 +262,4 @@ function Section({ title, children }: { title: string; children: React.ReactNode
     </section>
   );
 }
+
