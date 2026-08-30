@@ -19,6 +19,7 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
+export type DocumentStatut = "manquant" | "recu";
 export type UserRole = "conseiller" | "client" | "admin";
 export type SituationFamiliale = "celibataire" | "marie" | "pacse" | "concubinage" | "divorce" | "veuf";
 
@@ -163,10 +164,44 @@ export interface Database {
         };
         Relationships: [];
       };
+      documents: {
+        Row: {
+          id: string;
+          client_id: string;
+          nom: string;
+          categorie: string;
+          statut: "manquant" | "recu";
+          note: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          client_id: string;
+          nom: string;
+          categorie: string;
+          statut?: "manquant" | "recu";
+          note?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          client_id?: string;
+          nom?: string;
+          categorie?: string;
+          statut?: "manquant" | "recu";
+          note?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
     Enums: {
+      document_statut: DocumentStatut;
       user_role: UserRole;
     };
     CompositeTypes: Record<string, never>;
@@ -178,3 +213,4 @@ export type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 export type ClientRow = Database["public"]["Tables"]["clients"]["Row"];
 export type ConjointRow = Database["public"]["Tables"]["conjoints"]["Row"];
 export type EnfantRow = Database["public"]["Tables"]["enfants"]["Row"];
+export type DocumentRow = Database["public"]["Tables"]["documents"]["Row"];

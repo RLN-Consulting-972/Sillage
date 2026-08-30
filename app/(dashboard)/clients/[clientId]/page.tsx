@@ -3,10 +3,12 @@ import { notFound } from "next/navigation";
 import { Edit2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getClientById } from "@/modules/clients/service";
+import { listDocuments } from "@/modules/documents/service";
 import { PageHeader, WaveRule } from "@/components/layout/page-header";
 import { InfoItem, MissingBanner } from "@/components/layout/missing-info";
 import { DeleteClientButton } from "@/components/clients/delete-client-button";
 import { InviteClientButton } from "@/components/clients/invite-client-button";
+import { DocumentsSection } from "@/components/clients/documents-section";
 
 const REQUIRED_FIELDS = [
   "dateNaissance",
@@ -27,6 +29,7 @@ export default async function ClientPage({
 
   if (!client) notFound();
 
+  const documents = await listDocuments(supabase, clientId);
   const missingCount = REQUIRED_FIELDS.filter((f) => !client[f]).length;
 
   return (
@@ -109,6 +112,8 @@ export default async function ClientPage({
         )}
       </Section>
 
+      <DocumentsSection clientId={client.id} initialDocuments={documents} />
+
       <Section title="Espace client">
         <div className="sm:col-span-2">
           <InviteClientButton
@@ -120,9 +125,8 @@ export default async function ClientPage({
       </Section>
 
       <div className="rounded-xl border border-dashed border-border p-5 text-sm text-foreground/50">
-        Revenus, charges, patrimoine, objectifs, fiscalité, retraite,
-        documents et préconisations seront disponibles aux étapes suivantes
-        de l'outil.
+        Revenus, charges, patrimoine, objectifs, fiscalité, retraite et
+        préconisations seront disponibles aux étapes suivantes de l'outil.
       </div>
     </div>
   );
