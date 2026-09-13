@@ -35,7 +35,13 @@ export const clientFormSchema = z.object({
   telephone: z.string().optional(),
   email: z.string().email("Email invalide").optional().or(z.literal("")),
   residenceFiscale: z.string().optional(),
-  situationFamiliale: situationFamilialeSchema.optional(),
+  // Le <select> HTML envoie "" (chaîne vide) quand rien n'est choisi,
+  // jamais "undefined" — sans ce preprocess, la validation rejetait
+  // toute création de client où ce champ restait sur "—".
+  situationFamiliale: z.preprocess(
+    (val) => (val === "" ? undefined : val),
+    situationFamilialeSchema.optional()
+  ),
   regimeMatrimonial: z.string().optional(),
   dateMariage: z.string().optional(),
   contratMariage: z.boolean().optional(),
