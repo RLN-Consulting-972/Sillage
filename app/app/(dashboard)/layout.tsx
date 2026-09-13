@@ -1,0 +1,42 @@
+import { redirect } from "next/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { Sidebar } from "@/components/layout/sidebar";
+import { Header } from "@/components/layout/header";
+
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, role")
+    .eq("id", user.id)
+    .single();
+
+  // Un compte "client" qui arriverait ici (URL devinée, ancien favori...)
+  // repart vers son propre espace — cette zone est réservée aux conseillers.
+  if (profile?.role === "client") {
+    redirect("/mon-espace");
+  }
+
+  return (
+    <div className="flex min-h-screen">
+      <Sidebar />
+      <div className="flex flex-1 flex-col">
+        <Header userName={profile?.full_name} />
+        <main className="flex-1 bg-secondary/40 p-6">{children}</main>
+      </div>
+    </div>
+  );
+}
