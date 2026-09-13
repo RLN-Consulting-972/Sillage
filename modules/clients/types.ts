@@ -1,5 +1,18 @@
 import type { SituationFamiliale } from "@/types/database.types";
 
+export const SITUATIONS = [
+  { value: "celibataire", label: "Célibataire" },
+  { value: "marie", label: "Marié(e)" },
+  { value: "pacse", label: "Pacsé(e)" },
+  { value: "concubinage", label: "Concubinage" },
+  { value: "divorce", label: "Divorcé(e)" },
+  { value: "veuf", label: "Veuf/Veuve" },
+] as const satisfies { value: SituationFamiliale; label: string }[];
+
+export function situationFamilialeLabel(value?: SituationFamiliale | null): string {
+  return SITUATIONS.find((s) => s.value === value)?.label ?? "—";
+}
+
 export interface Enfant {
   id?: string;
   prenom: string;

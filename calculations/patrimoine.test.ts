@@ -6,6 +6,8 @@ import {
   calculateGrossWealth,
   calculateNetWealth,
   calculateRealEstateRatio,
+  calculateDebtRatio,
+  calculateLiquidityMonths,
 } from "./patrimoine";
 
 describe("calculateRevenusMensuels", () => {
@@ -64,5 +66,29 @@ describe("calculateRealEstateRatio", () => {
 
   it("renvoie 0 sans aucun patrimoine", () => {
     expect(calculateRealEstateRatio([], [])).toBe(0);
+  });
+});
+
+describe("calculateDebtRatio", () => {
+  it("calcule le taux d'endettement (mensualités / revenus)", () => {
+    const ratio = calculateDebtRatio(
+      [{ mensualiteCredit: 1000 }],
+      [{ montant: 3000, periodicite: "mensuel" }]
+    );
+    expect(ratio).toBeCloseTo(0.333, 2);
+  });
+
+  it("renvoie 0 sans revenu (évite la division par zéro)", () => {
+    expect(calculateDebtRatio([{ mensualiteCredit: 500 }], [])).toBe(0);
+  });
+});
+
+describe("calculateLiquidityMonths", () => {
+  it("calcule combien de mois de charges sont couverts par l'épargne liquide", () => {
+    const mois = calculateLiquidityMonths(
+      [{ montant: 6000 }],
+      [{ montant: 2000, periodicite: "mensuel" }]
+    );
+    expect(mois).toBe(3);
   });
 });

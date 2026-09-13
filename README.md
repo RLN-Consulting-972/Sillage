@@ -182,21 +182,65 @@ sources ailleurs en parallèle tant que ces briques n'existent pas.
 
 ---
 
-## Prochaines étapes possibles
+## Module Opportunités (RULES_V0.1)
 
-Dans l'ordre discuté le 30/08, pour servir l'objectif prioritaire
-(faciliter la collecte de données, produire un audit transmissible, et
-détecter des opportunités commerciales) :
+Sur chaque fiche client, une section "Opportunités" affiche des pistes
+détectées **automatiquement** à partir des revenus, charges et patrimoine
+déjà saisis — sans upload de document, sans IA, juste 6 règles
+déterministes (`rules/opportunites.ts`, 13 tests unitaires) :
+
+1. Concentration immobilière (> 70% du patrimoine brut)
+2. Faible liquidité (moins de 3 mois de charges couverts par l'épargne
+   disponible)
+3. Endettement élevé (mensualités de crédit > 33% des revenus)
+4. Assurance emprunteur à vérifier (dès qu'un crédit immobilier est en
+   cours)
+5. Regroupement de crédits à étudier (2 crédits actifs ou plus)
+6. Capacité d'épargne à valoriser (épargne mensuelle notable sans
+   PER/PERCOL/assurance-vie)
+
+Ces 6 règles reprennent une partie de la liste de "10 règles de
+démonstration" du cahier des charges initial (RULES_V0.1) — les 4
+restantes (écart retraite, diversification financière faible,
+transmission à étudier, protection du conjoint à étudier) demandent des
+données pas encore collectées (retraite, succession) et attendront ces
+modules. Le tableau de bord agrège aussi le nombre total d'opportunités
+sur l'ensemble du portefeuille.
+
+**Toujours des pistes, jamais des vérités** : chaque opportunité affiche
+un rappel qu'elle ne doit jamais être présentée telle quelle à un client
+sans validation par la conseillère — conforme au principe "le conseiller
+reste décisionnaire" du cahier des charges initial.
+
+## Autres corrections de ce lot
+
+- Les libellés de situation familiale ("Marié(e)", "Célibataire"...)
+  s'affichent maintenant correctement partout — un bug affichait la
+  valeur technique brute ("marie", "celibataire") sur la fiche client et
+  la liste des clients.
+- Les 5 modules financiers (revenus, charges, immobilier, placements,
+  objectifs) sont maintenant **modifiables** (icône crayon), plus
+  seulement supprimables.
+- Nouvelles catégories de patrimoine financier : CEL, PEL, compte sur
+  livret, PERCOL/PERCO.
+- La synthèse patrimoniale (cartes en haut de la fiche client) se
+  rafraîchit maintenant automatiquement après chaque ajout/modification/
+  suppression, sans recharger la page.
+- `vitest.config.mts` ajouté (résolution de l'alias `@/` pour les tests
+  situés hors de `calculations/` et `modules/`).
+
+## Prochaines étapes possibles
 
 1. **Upload de fichiers** dans le module Documents (actuellement
    checklist seule) — nécessaire avant l'extraction automatique de
    données par Claude.
-2. **Opportunités** (assurance emprunteur, rachat de crédit détectés à
-   partir des données du dossier) — le "++" commercial évoqué.
-3. **Rapport PDF** — le livrable final à transmettre au client.
-4. Reprendre le **mode client** une fois qu'il y aura une vraie valeur à
+2. **Rapport PDF** — le livrable final à transmettre au client.
+3. Reprendre le **mode client** une fois qu'il y aura une vraie valeur à
    y ajouter (questionnaire que le client peut remplir lui-même).
+4. Enrichir le moteur de règles avec les 4 règles restantes une fois les
+   modules retraite/succession construits, puis envisager un vrai
+   versionnage des règles (actuellement figées dans le code, pas encore
+   configurables sans redéploiement).
 
-Le moteur de règles versionné, la base documentaire RAG, et l'intégration
-Claude pour l'analyse restent dans la vision long terme du projet mais
-n'ont pas encore été entamés.
+La base documentaire RAG et l'intégration Claude pour l'analyse restent
+dans la vision long terme du projet mais n'ont pas encore été entamées.

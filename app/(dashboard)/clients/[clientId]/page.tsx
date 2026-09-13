@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Edit2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getClientById } from "@/modules/clients/service";
+import { situationFamilialeLabel } from "@/modules/clients/types";
 import { listDocuments } from "@/modules/documents/service";
 import {
   listRevenus, listCharges, listImmobilier, listFinanciers, listObjectifs,
@@ -15,12 +16,14 @@ import {
   calculateRevenusMensuels, calculateChargesMensuelles, calculateSavingsCapacity,
   calculateGrossWealth, calculateNetWealth,
 } from "@/calculations/patrimoine";
+import { detecterOpportunites } from "@/rules/opportunites";
 import { PageHeader, WaveRule } from "@/components/layout/page-header";
 import { InfoItem, MissingBanner } from "@/components/layout/missing-info";
 import { DeleteClientButton } from "@/components/clients/delete-client-button";
 import { InviteClientButton } from "@/components/clients/invite-client-button";
 import { DocumentsSection } from "@/components/clients/documents-section";
 import { FinanceSection } from "@/components/clients/finance-section";
+import { OpportunitesSection } from "@/components/clients/opportunites-section";
 import { StatCard } from "@/components/layout/stat-card";
 
 const REQUIRED_FIELDS = [
@@ -73,6 +76,8 @@ export default async function ClientPage({
     actifs
   );
 
+  const opportunites = detecterOpportunites({ revenus, charges, biens, actifs });
+
   return (
     <div className="mx-auto max-w-3xl">
       <div className="mb-5 flex items-start justify-between">
@@ -116,6 +121,8 @@ export default async function ClientPage({
         />
       </div>
 
+      <OpportunitesSection opportunites={opportunites} />
+
       <Section title="Identité">
         <InfoItem label="Date de naissance" value={client.dateNaissance} required />
         <InfoItem label="Résidence fiscale" value={client.residenceFiscale} required />
@@ -125,7 +132,7 @@ export default async function ClientPage({
       </Section>
 
       <Section title="Situation familiale">
-        <InfoItem label="Situation" value={client.situationFamiliale} />
+        <InfoItem label="Situation" value={situationFamilialeLabel(client.situationFamiliale)} />
         {client.situationFamiliale === "marie" && (
           <>
             <InfoItem label="Régime matrimonial" value={client.regimeMatrimonial} />

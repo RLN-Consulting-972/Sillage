@@ -52,6 +52,18 @@ export async function deleteRevenu(supabase: DB, id: string): Promise<void> {
   if (error) throw error;
 }
 
+export async function updateRevenu(
+  supabase: DB, id: string,
+  input: { type: RevenuType; montant: number; periodicite: Periodicite; titulaire?: string }
+): Promise<Revenu> {
+  const { data, error } = await supabase
+    .from("revenus")
+    .update({ type: input.type, montant: input.montant, periodicite: input.periodicite, titulaire: input.titulaire ?? null })
+    .eq("id", id).select("*").single();
+  if (error) throw error;
+  return mapRevenu(data);
+}
+
 // ---------- Charges ----------
 
 function mapCharge(row: ChargeRow): Charge {
@@ -86,6 +98,18 @@ export async function createCharge(
 export async function deleteCharge(supabase: DB, id: string): Promise<void> {
   const { error } = await supabase.from("charges").delete().eq("id", id);
   if (error) throw error;
+}
+
+export async function updateCharge(
+  supabase: DB, id: string,
+  input: { type: ChargeType; montant: number; periodicite: Periodicite }
+): Promise<Charge> {
+  const { data, error } = await supabase
+    .from("charges")
+    .update({ type: input.type, montant: input.montant, periodicite: input.periodicite })
+    .eq("id", id).select("*").single();
+  if (error) throw error;
+  return mapCharge(data);
 }
 
 // ---------- Patrimoine immobilier ----------
@@ -128,6 +152,21 @@ export async function deleteImmobilier(supabase: DB, id: string): Promise<void> 
   if (error) throw error;
 }
 
+export async function updateImmobilier(
+  supabase: DB, id: string,
+  input: { type: ImmobilierType; valeurEstimee: number; creditRestant: number; mensualiteCredit: number }
+): Promise<BienImmobilier> {
+  const { data, error } = await supabase
+    .from("patrimoine_immobilier")
+    .update({
+      type: input.type, valeur_estimee: input.valeurEstimee,
+      credit_restant: input.creditRestant, mensualite_credit: input.mensualiteCredit,
+    })
+    .eq("id", id).select("*").single();
+  if (error) throw error;
+  return mapImmobilier(data);
+}
+
 // ---------- Patrimoine financier ----------
 
 function mapFinancier(row: PatrimoineFinancierRow): ActifFinancier {
@@ -162,6 +201,18 @@ export async function createFinancier(
 export async function deleteFinancier(supabase: DB, id: string): Promise<void> {
   const { error } = await supabase.from("patrimoine_financier").delete().eq("id", id);
   if (error) throw error;
+}
+
+export async function updateFinancier(
+  supabase: DB, id: string,
+  input: { type: FinancierType; montant: number; etablissement?: string }
+): Promise<ActifFinancier> {
+  const { data, error } = await supabase
+    .from("patrimoine_financier")
+    .update({ type: input.type, montant: input.montant, etablissement: input.etablissement ?? null })
+    .eq("id", id).select("*").single();
+  if (error) throw error;
+  return mapFinancier(data);
 }
 
 // ---------- Objectifs ----------
@@ -202,4 +253,19 @@ export async function createObjectif(
 export async function deleteObjectif(supabase: DB, id: string): Promise<void> {
   const { error } = await supabase.from("objectifs").delete().eq("id", id);
   if (error) throw error;
+}
+
+export async function updateObjectif(
+  supabase: DB, id: string,
+  input: { type: ObjectifType; montantCible?: number; echeance?: string; priorite: Priorite }
+): Promise<Objectif> {
+  const { data, error } = await supabase
+    .from("objectifs")
+    .update({
+      type: input.type, montant_cible: input.montantCible ?? null,
+      echeance: input.echeance ?? null, priorite: input.priorite,
+    })
+    .eq("id", id).select("*").single();
+  if (error) throw error;
+  return mapObjectif(data);
 }

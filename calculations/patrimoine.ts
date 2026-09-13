@@ -75,3 +75,29 @@ export function calculateRealEstateRatio(
   if (brut === 0) return 0;
   return calculatePatrimoineImmobilierBrut(biens) / brut;
 }
+
+export interface CreditImmobilierLike {
+  mensualiteCredit: number;
+}
+
+/** Taux d'endettement = mensualités de crédit / revenus mensuels. */
+export function calculateDebtRatio(
+  biens: CreditImmobilierLike[],
+  revenus: RevenuLike[]
+): number {
+  const revenusMensuels = calculateRevenusMensuels(revenus);
+  if (revenusMensuels === 0) return 0;
+  const mensualites = biens.reduce((total, b) => total + b.mensualiteCredit, 0);
+  return mensualites / revenusMensuels;
+}
+
+/** Épargne disponible rapidement (livrets, comptes) — hors immobilier et hors PER/assurance-vie bloqués. */
+export function calculateLiquidityMonths(
+  actifsLiquides: ActifFinancierLike[],
+  charges: ChargeLike[]
+): number {
+  const chargesMensuelles = calculateChargesMensuelles(charges);
+  if (chargesMensuelles === 0) return Infinity;
+  const liquidites = calculatePatrimoineFinancier(actifsLiquides);
+  return liquidites / chargesMensuelles;
+}

@@ -32,8 +32,12 @@ export const IMMOBILIER_TYPES = [
 export const FINANCIER_TYPES = [
   { value: "livret_a", label: "Livret A" },
   { value: "ldds", label: "LDDS" },
+  { value: "cel", label: "CEL" },
+  { value: "pel", label: "PEL" },
+  { value: "compte_sur_livret", label: "Compte sur livret" },
   { value: "assurance_vie", label: "Assurance-vie" },
   { value: "per", label: "PER" },
+  { value: "percol", label: "PERCOL / PERCO" },
   { value: "pea", label: "PEA" },
   { value: "compte_titres", label: "Compte-titres" },
   { value: "comptes_bancaires", label: "Comptes bancaires" },

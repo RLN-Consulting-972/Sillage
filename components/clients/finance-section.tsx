@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { Plus, Trash2, Edit2 } from "lucide-react";
 import { Field, inputClass } from "@/components/clients/field";
 
 type FieldDef =
@@ -20,6 +21,18 @@ function formatValue(field: FieldDef, value: unknown): string {
   return String(value);
 }
 
+function emptyDraft(fields: FieldDef[]): Record<string, string> {
+  return Object.fromEntries(
+    fields.map((f) => [f.key, f.kind === "select" ? f.options[0]?.value ?? "" : ""])
+  );
+}
+
+function draftFromRecord(fields: FieldDef[], record: Record<string, unknown>): Record<string, string> {
+  return Object.fromEntries(
+    fields.map((f) => [f.key, record[f.key] !== undefined && record[f.key] !== null ? String(record[f.key]) : ""])
+  );
+}
+
 export function FinanceSection<T extends { id: string }>({
   title,
   fields,
@@ -36,42 +49,85 @@ export function FinanceSection<T extends { id: string }>({
   emptyLabel: string;
 }) {
   const [records, setRecords] = useState(items);
-  const [showForm, setShowForm] = useState(false);
-  const [draft, setDraft] = useState<Record<string, string>>(() =>
-    Object.fromEntries(
-      fields.map((f) => [f.key, f.kind === "select" ? f.options[0]?.value ?? "" : ""])
-    )
-  );
+  const router = useRouter();
+
+  // La synthèse patrimoniale en haut de la fiche client est calculée côté
+  // serveur, à partir des données de TOUS les modules financiers. Ce
+  // composant ne connaît que sa propre liste — sans ce useEffect, la
+  // synthèse resterait figée sur les anciens chiffres tant que la page
+  // n'est pas rechargée manuellement.
+  useEffect(() => {
+    setRecords(items);
+  }, [items]);
+
+  const [mode, setMode] = useState<"closed" | "adding" | "editing">("closed");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<Record<string, string>>(() => emptyDraft(fields));
   const [busy, setBusy] = useState(false);
 
-  async function handleAdd() {
-    setBusy(true);
+  function openAddForm() {
+    setDraft(emptyDraft(fields));
+    setEditingId(null);
+    setMode("adding");
+  }
+
+  function openEditForm(record: T) {
+    setDraft(draftFromRecord(fields, record as Record<string, unknown>));
+    setEditingId(record.id);
+    setMode("editing");
+  }
+
+  function closeForm() {
+    setMode("closed");
+    setEditingId(null);
+  }
+
+  function buildPayload() {
     const payload: Record<string, string | number> = {};
     for (const f of fields) {
       payload[f.key] = f.kind === "number" ? Number(draft[f.key] || 0) : draft[f.key];
     }
+    return payload;
+  }
+
+  async function handleAdd() {
+    setBusy(true);
     const res = await fetch(listUrl, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(buildPayload()),
     });
     setBusy(false);
     if (res.ok) {
       const body = await res.json();
       const created = Object.values(body)[0] as T;
       setRecords((prev) => [...prev, created]);
-      setShowForm(false);
-      setDraft(
-        Object.fromEntries(
-          fields.map((f) => [f.key, f.kind === "select" ? f.options[0]?.value ?? "" : ""])
-        )
-      );
+      closeForm();
+      router.refresh();
+    }
+  }
+
+  async function handleSaveEdit() {
+    if (!editingId) return;
+    setBusy(true);
+    const res = await fetch(`${deleteUrlPrefix}/${editingId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(buildPayload()),
+    });
+    setBusy(false);
+    if (res.ok) {
+      const { record: updated } = await res.json();
+      setRecords((prev) => prev.map((r) => (r.id === editingId ? (updated as T) : r)));
+      closeForm();
+      router.refresh();
     }
   }
 
   async function handleRemove(id: string) {
     setRecords((prev) => prev.filter((r) => r.id !== id));
     await fetch(`${deleteUrlPrefix}/${id}`, { method: "DELETE" });
+    router.refresh();
   }
 
   return (
@@ -79,7 +135,7 @@ export function FinanceSection<T extends { id: string }>({
       <div className="mb-4 flex items-center justify-between">
         <h2 className="font-serif text-sm font-medium text-primary">{title}</h2>
         <button
-          onClick={() => setShowForm((s) => !s)}
+          onClick={mode === "closed" ? openAddForm : closeForm}
           className="flex items-center gap-1.5 text-sm text-accent-dark hover:underline"
         >
           <Plus size={14} />
@@ -87,8 +143,11 @@ export function FinanceSection<T extends { id: string }>({
         </button>
       </div>
 
-      {showForm && (
+      {mode !== "closed" && (
         <div className="mb-4 rounded-md border border-border bg-secondary/40 p-4">
+          <p className="mb-3 text-xs font-medium text-foreground/50">
+            {mode === "editing" ? "Modifier cet élément" : "Nouvel élément"}
+          </p>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {fields.map((f) => (
               <Field key={f.key} label={f.label}>
@@ -116,15 +175,15 @@ export function FinanceSection<T extends { id: string }>({
             ))}
           </div>
           <div className="mt-3 flex justify-end gap-2">
-            <button onClick={() => setShowForm(false)} className="rounded-md border border-border px-3 py-1.5 text-sm">
+            <button onClick={closeForm} className="rounded-md border border-border px-3 py-1.5 text-sm">
               Annuler
             </button>
             <button
-              onClick={handleAdd}
+              onClick={mode === "editing" ? handleSaveEdit : handleAdd}
               disabled={busy}
               className="rounded-md bg-primary px-3 py-1.5 text-sm text-white disabled:opacity-50"
             >
-              Ajouter
+              {mode === "editing" ? "Enregistrer" : "Ajouter"}
             </button>
           </div>
         </div>
@@ -144,9 +203,14 @@ export function FinanceSection<T extends { id: string }>({
                   </span>
                 ))}
               </span>
-              <button onClick={() => handleRemove(record.id)} className="text-foreground/30 hover:text-bordeaux">
-                <Trash2 size={14} />
-              </button>
+              <span className="flex items-center gap-3">
+                <button onClick={() => openEditForm(record)} className="text-foreground/30 hover:text-accent-dark">
+                  <Edit2 size={14} />
+                </button>
+                <button onClick={() => handleRemove(record.id)} className="text-foreground/30 hover:text-bordeaux">
+                  <Trash2 size={14} />
+                </button>
+              </span>
             </li>
           ))}
         </ul>

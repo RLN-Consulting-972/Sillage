@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Client } from "@/modules/clients/types";
+import { situationFamilialeLabel } from "@/modules/clients/types";
 
 export function ClientTable({ clients }: { clients: Client[] }) {
   if (clients.length === 0) {
@@ -33,7 +34,7 @@ export function ClientTable({ clients }: { clients: Client[] }) {
               <td className="px-4 py-3 text-foreground/70">{client.email ?? "—"}</td>
               <td className="px-4 py-3 text-foreground/70">{client.telephone ?? "—"}</td>
               <td className="px-4 py-3 text-foreground/70">
-                {client.situationFamiliale ?? "—"}
+                {situationFamilialeLabel(client.situationFamiliale)}
               </td>
             </tr>
           ))}

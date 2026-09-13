@@ -9,18 +9,10 @@ import {
   type ClientFormValues,
 } from "@/modules/clients/schema";
 import type { Client } from "@/modules/clients/types";
+import { SITUATIONS } from "@/modules/clients/types";
 import { Field, inputClass } from "./field";
 import { MissingBanner } from "@/components/layout/missing-info";
 import { AlertCircle } from "lucide-react";
-
-const SITUATIONS = [
-  { value: "celibataire", label: "Célibataire" },
-  { value: "marie", label: "Marié(e)" },
-  { value: "pacse", label: "Pacsé(e)" },
-  { value: "concubinage", label: "Concubinage" },
-  { value: "divorce", label: "Divorcé(e)" },
-  { value: "veuf", label: "Veuf/Veuve" },
-] as const;
 
 function clientToFormValues(client?: Client | null): ClientFormValues {
   if (!client) return { nom: "", prenom: "", enfants: [] };
