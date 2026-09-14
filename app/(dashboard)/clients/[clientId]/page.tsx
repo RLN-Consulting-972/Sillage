@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Edit2 } from "lucide-react";
+import { Edit2, FileDown } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getClientById } from "@/modules/clients/service";
 import { situationFamilialeLabel } from "@/modules/clients/types";
@@ -89,6 +89,13 @@ export default async function ClientPage({
           <WaveRule />
         </div>
         <div className="flex gap-4">
+          <a
+            href={`/api/clients/${client.id}/rapport`}
+            className="flex items-center gap-1 text-sm text-accent-dark hover:underline"
+          >
+            <FileDown size={13} />
+            Rapport PDF
+          </a>
           <Link
             href={`/clients/${client.id}/modifier`}
             className="flex items-center gap-1 text-sm text-accent-dark hover:underline"

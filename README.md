@@ -254,15 +254,59 @@ le code et la contrainte `CHECK` en base.
 - `vitest.config.mts` ajouté (résolution de l'alias `@/` pour les tests
   situés hors de `calculations/` et `modules/`).
 
+## Rapport PDF (Phase 7)
+
+Bouton "Rapport PDF" sur chaque fiche client, générant un document
+complet de 8 pages (`GET /api/clients/[clientId]/rapport`), avec les 15
+sections du cahier des charges initial :
+
+1. Couverture (logo, nom du client, date)
+2. Votre situation en bref (identité, synthèse patrimoniale)
+3. Votre patrimoine (donut immobilier/financier, détail des biens/actifs)
+4. Vos revenus et charges (barres, détail ligne par ligne)
+5-8. Fiscalité / Retraite / Protection / Transmission
+9-10. Points forts / Points de vigilance
+11. Opportunités identifiées (issues du moteur de règles RULES_V0.1)
+12-13. Préconisations validées / Scénarios
+14. Plan d'action (basé sur les opportunités de priorité haute)
+15. Annexes (statut des documents du dossier)
+
+**Principe strict respecté** : les sections 5 à 8, 12 et 13 demandent des
+données qui n'existent pas encore dans l'outil (fiscalité, retraite,
+protection, transmission, validation de préconisations, scénarios) —
+elles affichent une mention honnête "à compléter" plutôt que du contenu
+inventé. Seules les sections 1 à 4, 11, 14 (partiellement) et 15
+affichent de vraies données, toujours calculées par
+`calculations/patrimoine.ts` et `rules/opportunites.ts`, jamais par une IA.
+
+**Graphiques** : 2 graphiques construits en SVG natif compatible PDF
+(`modules/rapport/charts.ts`, 5 tests unitaires sur la géométrie) — un
+donut (répartition immobilier/financier) et des barres (revenus vs
+charges). Les 6 autres graphiques du cahier des charges initial (brut/net,
+dettes, projection, radar patrimonial) demandent soit des données pas
+encore collectées (retraite pour la projection), soit ont été jugés
+redondants avec les 2 premiers pour cette V1 — à enrichir plus tard.
+
+**Testé par génération réelle, pas seulement compilation** :
+`modules/rapport/document.test.ts` génère un vrai buffer PDF (vérifié par
+sa signature `%PDF-`) dans 3 scénarios — dossier complet, dossier
+entièrement vide, avec logo. Le rendu a aussi été inspecté visuellement
+page par page (converti en images) avant livraison.
+
+**Point cosmétique mineur connu** : le logo sur la page de couverture a
+un fond blanc carré plutôt que transparent (le fichier source
+`rln-macaron.png` n'a pas de transparence) — à corriger avec une version
+détourée du logo si besoin.
+
 ## Prochaines étapes possibles
 
 1. **Upload de fichiers** dans le module Documents (actuellement
    checklist seule) — nécessaire avant l'extraction automatique de
-   données par Claude.
-2. **Rapport PDF** — le livrable final à transmettre au client.
-3. Reprendre le **mode client** une fois qu'il y aura une vraie valeur à
+   données par Claude, et avant de pouvoir joindre les vraies pièces en
+   annexe du rapport PDF.
+2. Reprendre le **mode client** une fois qu'il y aura une vraie valeur à
    y ajouter (questionnaire que le client peut remplir lui-même).
-4. Enrichir le moteur de règles avec les 4 règles restantes une fois les
+3. Enrichir le moteur de règles avec les 4 règles restantes une fois les
    modules retraite/succession construits, puis envisager un vrai
    versionnage des règles (actuellement figées dans le code, pas encore
    configurables sans redéploiement).
