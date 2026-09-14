@@ -37,7 +37,7 @@ export interface Opportunite {
 
 const LIQUIDE_TYPES = ["livret_a", "ldds", "cel", "compte_sur_livret", "comptes_bancaires"];
 const EPARGNE_LONG_TERME_TYPES = ["per", "percol", "assurance_vie"];
-const CREDIT_CHARGE_TYPES = ["credit_immobilier", "credit_consommation", "leasing"];
+const CREDIT_CHARGE_TYPES = ["credit_immobilier", "credit_consommation", "leasing", "prets_divers"];
 
 export interface DonneesClientPourRegles {
   revenus: RevenuLike[];

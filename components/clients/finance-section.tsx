@@ -5,10 +5,28 @@ import { useRouter } from "next/navigation";
 import { Plus, Trash2, Edit2 } from "lucide-react";
 import { Field, inputClass } from "@/components/clients/field";
 
+type SelectOption = { value: string; label: string; groupe?: string };
+
 type FieldDef =
-  | { key: string; label: string; kind: "select"; options: readonly { value: string; label: string }[] }
+  | { key: string; label: string; kind: "select"; options: readonly SelectOption[] }
   | { key: string; label: string; kind: "number" }
   | { key: string; label: string; kind: "text" };
+
+/** Regroupe les options par "groupe" (pour <optgroup>) en conservant
+ * l'ordre d'apparition — les options sans groupe restent à plat. */
+function groupOptions(options: readonly SelectOption[]) {
+  const groups = new Map<string, SelectOption[]>();
+  const sansGroupe: SelectOption[] = [];
+  for (const o of options) {
+    if (!o.groupe) {
+      sansGroupe.push(o);
+      continue;
+    }
+    if (!groups.has(o.groupe)) groups.set(o.groupe, []);
+    groups.get(o.groupe)!.push(o);
+  }
+  return { sansGroupe, groups };
+}
 
 function formatValue(field: FieldDef, value: unknown): string {
   if (value === undefined || value === null || value === "") return "—";
@@ -157,11 +175,27 @@ export function FinanceSection<T extends { id: string }>({
                     onChange={(e) => setDraft({ ...draft, [f.key]: e.target.value })}
                     className={inputClass}
                   >
-                    {f.options.map((o) => (
-                      <option key={o.value} value={o.value}>
-                        {o.label}
-                      </option>
-                    ))}
+                    {(() => {
+                      const { sansGroupe, groups } = groupOptions(f.options);
+                      return (
+                        <>
+                          {sansGroupe.map((o) => (
+                            <option key={o.value} value={o.value}>
+                              {o.label}
+                            </option>
+                          ))}
+                          {Array.from(groups.entries()).map(([groupe, opts]) => (
+                            <optgroup key={groupe} label={groupe}>
+                              {opts.map((o) => (
+                                <option key={o.value} value={o.value}>
+                                  {o.label}
+                                </option>
+                              ))}
+                            </optgroup>
+                          ))}
+                        </>
+                      );
+                    })()}
                   </select>
                 ) : (
                   <input

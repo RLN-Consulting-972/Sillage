@@ -212,6 +212,31 @@ un rappel qu'elle ne doit jamais être présentée telle quelle à un client
 sans validation par la conseillère — conforme au principe "le conseiller
 reste décisionnaire" du cahier des charges initial.
 
+## Catégories de revenus et charges — reprises du réseau CGP
+
+Sur transmission d'un tableau budgétaire type utilisé par le réseau de
+gestion de patrimoine de l'utilisatrice, les catégories de **revenus**
+(31, en 5 groupes) et de **charges** (60, en 10 groupes) ont été
+entièrement reprises de cette nomenclature professionnelle, pour rester
+cohérente avec les outils déjà utilisés côté réseau :
+
+- Revenus : Revenus d'activité, Pensions, Revenus fonciers, Aides
+  sociales, Autres revenus.
+- Charges : Impôts et cotisations, Logement, Vie courante, Enfants,
+  Animaux, Transports, Banque et assurance, Immobilier locatif, Loisirs,
+  Autres charges.
+
+Le menu déroulant regroupe visuellement ces catégories par `<optgroup>`
+(`components/clients/finance-section.tsx`) pour rester lisible malgré le
+volume. Les anciennes valeurs génériques (ex. "Salaire", "Crédit
+immobilier") restent acceptées en base et dans le menu (sous "Général
+(ancien)"), pour ne jamais invalider une donnée déjà saisie.
+
+**Extraction automatique** : la migration `0007_categories_revenus_charges.sql`
+est générée à partir des valeurs de `modules/finances/types.ts` (pas
+recopiée à la main), pour garantir qu'il n'y ait jamais de décalage entre
+le code et la contrainte `CHECK` en base.
+
 ## Autres corrections de ce lot
 
 - Les libellés de situation familiale ("Marié(e)", "Célibataire"...)
