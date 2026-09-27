@@ -33,14 +33,14 @@ export const REVENU_TYPES = [
   { value: "autre_revenu", label: "Autre revenu", groupe: "Autres revenus" },
 
   // Conservés pour compatibilité avec des données déjà saisies
-  { value: "salaire", label: "Salaire (générique)", groupe: "Général (ancien)" },
-  { value: "revenus_professionnels", label: "Revenus professionnels (générique)", groupe: "Général (ancien)" },
-  { value: "revenus_fonciers", label: "Revenus fonciers (générique)", groupe: "Général (ancien)" },
-  { value: "pensions", label: "Pensions (générique)", groupe: "Général (ancien)" },
-  { value: "retraites", label: "Retraites (générique)", groupe: "Général (ancien)" },
+  { value: "salaire", label: "Salaire", groupe: "Général (ancien)" },
+  { value: "revenus_professionnels", label: "Revenus professionnels", groupe: "Général (ancien)" },
+  { value: "revenus_fonciers", label: "Revenus fonciers", groupe: "Général (ancien)" },
+  { value: "pensions", label: "Pensions", groupe: "Général (ancien)" },
+  { value: "retraites", label: "Retraites", groupe: "Général (ancien)" },
   { value: "dividendes", label: "Dividendes", groupe: "Général (ancien)" },
   { value: "interets", label: "Intérêts", groupe: "Général (ancien)" },
-  { value: "autres", label: "Autres (générique)", groupe: "Général (ancien)" },
+  { value: "autres", label: "Autres", groupe: "Général (ancien)" },
 ] as const;
 
 export const CHARGE_TYPES = [
@@ -118,13 +118,13 @@ export const CHARGE_TYPES = [
   { value: "autre_charge", label: "Autre", groupe: "Autres charges" },
 
   // Conservés pour compatibilité avec des données déjà saisies
-  { value: "credit_immobilier", label: "Crédit immobilier (générique)", groupe: "Général (ancien)" },
-  { value: "credit_consommation", label: "Crédit consommation (générique)", groupe: "Général (ancien)" },
-  { value: "leasing", label: "Leasing (générique)", groupe: "Général (ancien)" },
-  { value: "loyer", label: "Loyer (générique)", groupe: "Général (ancien)" },
-  { value: "pension_versee", label: "Pension versée (générique)", groupe: "Général (ancien)" },
-  { value: "charges_recurrentes", label: "Charges récurrentes (générique)", groupe: "Général (ancien)" },
-  { value: "autres", label: "Autres (générique)", groupe: "Général (ancien)" },
+  { value: "credit_immobilier", label: "Crédit immobilier", groupe: "Général (ancien)" },
+  { value: "credit_consommation", label: "Crédit consommation", groupe: "Général (ancien)" },
+  { value: "leasing", label: "Leasing", groupe: "Général (ancien)" },
+  { value: "loyer", label: "Loyer", groupe: "Général (ancien)" },
+  { value: "pension_versee", label: "Pension versée", groupe: "Général (ancien)" },
+  { value: "charges_recurrentes", label: "Charges récurrentes", groupe: "Général (ancien)" },
+  { value: "autres", label: "Autres", groupe: "Général (ancien)" },
 ] as const;
 
 export const IMMOBILIER_TYPES = [

@@ -293,10 +293,28 @@ sa signature `%PDF-`) dans 3 scénarios — dossier complet, dossier
 entièrement vide, avec logo. Le rendu a aussi été inspecté visuellement
 page par page (converti en images) avant livraison.
 
-**Point cosmétique mineur connu** : le logo sur la page de couverture a
-un fond blanc carré plutôt que transparent (le fichier source
-`rln-macaron.png` n'a pas de transparence) — à corriger avec une version
-détourée du logo si besoin.
+## Corrections suite au premier retour de test réel (14/09)
+
+Après un premier vrai PDF généré et transmis par l'utilisatrice
+(cliente test "Tulipe BECASSE"), trois manques concrets ont été
+corrigés :
+
+- **Logo de couverture** : le fichier `public/rln-macaron.png` avait un
+  fond blanc opaque, pas transparent — il apparaissait comme un carré
+  blanc sur le fond crème de la couverture. Corrigé par traitement
+  d'image (seuil sur les pixels quasi-blancs rendus transparents,
+  vérifié par composition sur fond crème avant remplacement du fichier).
+- **"Points forts" et "Points de vigilance" toujours vides** :
+  remplacés par des constats strictement factuels dérivés des chiffres
+  déjà calculés (capacité d'épargne, patrimoine net) et des opportunités
+  déjà détectées — jamais une interprétation inventée.
+- **"Plan d'action" vide alors que des opportunités existaient** : il ne
+  reprenait que les opportunités de priorité "haute". Élargi à toutes
+  les priorités, triées (haute → moyenne → basse).
+- Une phrase de contexte factuelle ajoutée sous "Votre situation en
+  bref", et le message de la section Transmission adapté pour ne pas
+  donner l'impression d'un manque quand un client célibataire sans
+  enfant n'a simplement rien à mentionner.
 
 ## Prochaines étapes possibles
 

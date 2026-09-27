@@ -203,6 +203,33 @@ export function RapportDocument({
 
   const pieces_manquantes = documents.filter((d) => d.statut === "manquant");
 
+  // "Points forts" : uniquement des constats factuels directement dérivés
+  // des chiffres déjà calculés — jamais une interprétation ou une analyse
+  // inventée. Rien n'apparaît si rien ne peut être affirmé factuellement.
+  const pointsForts: string[] = [];
+  if (synthese.capaciteEpargne > 0) {
+    pointsForts.push(
+      `Une capacité d'épargne mensuelle de ${formatEUR(synthese.capaciteEpargne)} a été identifiée.`
+    );
+  }
+  if (synthese.patrimoineNet > 0) {
+    pointsForts.push(`Le patrimoine net s'élève à ${formatEUR(synthese.patrimoineNet)}.`);
+  }
+  if (opportunites.filter((o) => o.priorite === "haute").length === 0) {
+    pointsForts.push("Aucun point d'alerte de priorité haute n'a été détecté automatiquement.");
+  }
+
+  const ORDRE_PRIORITE = { haute: 0, moyenne: 1, basse: 2 } as const;
+  const opportunitesTrieesParPriorite = [...opportunites].sort(
+    (a, b) => ORDRE_PRIORITE[a.priorite] - ORDRE_PRIORITE[b.priorite]
+  );
+
+  const phraseSituation =
+    `Votre patrimoine net s'élève actuellement à ${formatEUR(synthese.patrimoineNet)}, ` +
+    `pour des revenus mensuels de ${formatEUR(synthese.revenusMensuels)} et une capacité ` +
+    `d'épargne ${synthese.capaciteEpargne >= 0 ? "de" : "négative de"} ` +
+    `${formatEUR(Math.abs(synthese.capaciteEpargne))} par mois.`;
+
   return (
     <Document
       title={`Rapport patrimonial — ${nomComplet}`}
@@ -239,6 +266,9 @@ export function RapportDocument({
 
         <View style={styles.section}>
           <SectionTitle>Votre situation en bref</SectionTitle>
+          <Text style={{ fontSize: 9.5, marginBottom: 12, lineHeight: 1.5 }}>
+            {phraseSituation}
+          </Text>
           <View style={styles.row}>
             <Text style={{ fontSize: 9, color: COLORS.muted }}>Situation familiale</Text>
             <Text style={{ fontSize: 9 }}>{situationFamilialeLabel(client.situationFamiliale)}</Text>
@@ -441,7 +471,11 @@ export function RapportDocument({
               ))}
             </View>
           ) : (
-            <Placeholder>Aucune information familiale renseignée pour l'instant.</Placeholder>
+            <Placeholder>
+              {client.situationFamiliale === "celibataire"
+                ? "Aucun conjoint ni enfant à mentionner à ce stade."
+                : "Aucune information sur le conjoint ou les enfants n'a encore été renseignée."}
+            </Placeholder>
           )}
           <Text style={[styles.placeholderText, { marginTop: 6 }]}>
             L'analyse successorale elle-même sera disponible une fois le module transmission construit.
@@ -455,15 +489,40 @@ export function RapportDocument({
       <Page size="A4" style={styles.page}>
         <View style={styles.section}>
           <SectionTitle>Points forts</SectionTitle>
-          <Placeholder>
-            À compléter par votre conseillère lors de l'entretien de restitution.
-          </Placeholder>
+          {pointsForts.length === 0 ? (
+            <Placeholder>
+              Aucun point fort identifié automatiquement avec les informations actuellement
+              renseignées.
+            </Placeholder>
+          ) : (
+            <View style={styles.table}>
+              {pointsForts.map((texte, i) => (
+                <View key={i} style={[styles.tableRow, i === pointsForts.length - 1 ? styles.tableRowLast : undefined]}>
+                  <Text style={{ fontSize: 9 }}>{texte}</Text>
+                </View>
+              ))}
+            </View>
+          )}
         </View>
         <View style={styles.section}>
           <SectionTitle>Points de vigilance</SectionTitle>
-          <Placeholder>
-            À compléter par votre conseillère lors de l'entretien de restitution.
-          </Placeholder>
+          {opportunites.length === 0 ? (
+            <Placeholder>
+              Aucun point de vigilance identifié automatiquement avec les informations
+              actuellement renseignées.
+            </Placeholder>
+          ) : (
+            <View style={styles.table}>
+              {opportunites.map((o, i) => (
+                <View key={o.id} style={[styles.tableRow, i === opportunites.length - 1 ? styles.tableRowLast : undefined]}>
+                  <Text style={{ fontSize: 9 }}>{o.titre}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+          <Text style={[styles.placeholderText, { marginTop: 6 }]}>
+            Détail de chaque point ci-après, dans "Opportunités identifiées".
+          </Text>
         </View>
 
         {/* 11. OPPORTUNITÉS IDENTIFIÉES */}
@@ -508,25 +567,30 @@ export function RapportDocument({
         {/* 14. PLAN D'ACTION */}
         <View style={styles.section}>
           <SectionTitle>Plan d'action</SectionTitle>
-          {opportunites.filter((o) => o.priorite === "haute").length === 0 ? (
+          {opportunites.length === 0 ? (
             <Placeholder>
-              Aucune action prioritaire identifiée automatiquement pour l'instant.
+              Aucune action identifiée automatiquement pour l'instant.
             </Placeholder>
           ) : (
             <View style={styles.table}>
-              {opportunites
-                .filter((o) => o.priorite === "haute")
-                .map((o, i, arr) => (
-                  <View key={o.id} style={[styles.tableRow, i === arr.length - 1 ? styles.tableRowLast : undefined]}>
-                    <Text style={styles.tableCellLabel}>{o.titre}</Text>
-                    <Text style={[styles.tableCellValue, { color: COLORS.bordeaux }]}>Priorité haute</Text>
-                  </View>
-                ))}
+              {opportunitesTrieesParPriorite.map((o, i, arr) => (
+                <View key={o.id} style={[styles.tableRow, i === arr.length - 1 ? styles.tableRowLast : undefined]}>
+                  <Text style={styles.tableCellLabel}>{o.titre}</Text>
+                  <Text
+                    style={[
+                      styles.tableCellValue,
+                      { color: o.priorite === "haute" ? COLORS.bordeaux : COLORS.accentDark },
+                    ]}
+                  >
+                    {o.priorite === "haute" ? "Priorité haute" : o.priorite === "moyenne" ? "À étudier" : "Pour information"}
+                  </Text>
+                </View>
+              ))}
             </View>
           )}
           <Text style={[styles.placeholderText, { marginTop: 6 }]}>
-            Plan d'action provisoire basé sur les opportunités de priorité haute — à valider et
-            détailler avec votre conseillère.
+            Plan d'action provisoire basé sur les opportunités détectées, classées par priorité —
+            à valider et détailler avec votre conseillère.
           </Text>
         </View>
 
